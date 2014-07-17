@@ -36,6 +36,19 @@ def fn_encrypt( message, passphrase ):
 	return base64.b64encode(aes.encrypt(message))
 	##################
 
+def fn_hex_grid( input_text, hex_range ):
+	# Init grid.
+	grid = _np.zeros((256,256))
+	# For each combination of letters, populate grid.
+	for e,each_char in enumerate(input_text):
+		if e > 0: # Cannot check first one.
+			y_ix = hex_range.index(each_char.encode('hex'))
+			x_ix = hex_range.index(input_text[e-1].encode('hex'))
+			grid[y_ix,x_ix] += 1
+	# Done > return grid
+	return grid
+	##################
+
 ##################
 ##################
 
@@ -48,36 +61,26 @@ def fn_encrypt( message, passphrase ):
 ##
 if __name__=="__main__":
 
+	# Load text and encrypt the text (CFB?).
 	text = fn_load_text()
+	text_enc = fn_encrypt( message=text, passphrase='ThisIsNotEncrypt' )
 
 	hex_range = fn_hex_range()
 
-	text_grid = _np.zeros((255,255))
-	for e,each_char in enumerate(text):
-		if e > 0: # Cannot check first one.
-			y_ix = hex_range.index(each_char.encode('hex'))
-			x_ix = hex_range.index(text[e-1].encode('hex'))
-			text_grid[y_ix,x_ix] += 1
-
-
-	# ENCRYPT TEXT
-	text_enc = fn_encrypt( message=text, passphrase='ThisIsNotEncrypt' )
-	text_enc_grid = _np.zeros((255,255))
-	for e,each_char in enumerate(text_enc):
-		if e > 0: # Cannot check first one.
-			y_ix = hex_range.index(each_char.encode('hex'))
-			x_ix = hex_range.index(text_enc[e-1].encode('hex'))
-			text_enc_grid[y_ix,x_ix] += 1
-
+	# Create grids.
+	text_grid = fn_hex_grid( input_text=text, hex_range=hex_range )
+	text_enc_grid = fn_hex_grid( input_text=text_enc, hex_range=hex_range )
 
 	# VISUALIZE
 	_plt.figure( figsize=(17, 9) )
 	_plt.subplot(1,2,1)
 	_plt.pcolor(text_grid, cmap=_plt.cm.OrRd)
-	_plt.xlim([0, 255])
-	_plt.ylim([0, 255])
+	_plt.xlim([0, 120])
+	_plt.ylim([0, 120])
 	_plt.subplot(1,2,2)
 	_plt.pcolor(text_enc_grid, cmap=_plt.cm.OrRd)
+	_plt.xlim([0, 120])
+	_plt.ylim([0, 120])
 	_plt.colorbar()
 	_plt.show()
 
